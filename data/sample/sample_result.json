@@ -1,0 +1,19 @@
+{
+  "city": "London",
+  "date": "2026-11-17",
+  "action": "Expect higher NO2 near busy roads between 17:00 and 20:00 if wind stays low. Advise schools and outdoor workers near main roads to limit evening exposure.",
+  "confidence": "medium",
+  "supporting_figures": [
+    {"pollutant": "NO2", "measure": "peak_ugm3", "value": 37.6, "hour": 18},
+    {"pollutant": "NO2", "measure": "link_wind", "value": -0.62}
+  ],
+  "data_issues": ["41 NO2 sites reported no data"],
+  "steps": [
+    {"agent": "Collector", "output": "Fetched London Air and Open-Meteo for 2026-11-17. 41 of 99 NO2 sites had no data."},
+    {"agent": "Analyst", "output": "- NO2 peaked at 37.6 µg/m³ at 18:00\n- NO2 is linked to low wind (link -0.62 over 30 days)\n- NO2 is linked to rush hour (link 0.34)"},
+    {"agent": "Reviewer", "status": "sent_back", "output": "Rejected: 'traffic caused the peak'. No traffic figure in the table. Use 'linked to'."},
+    {"agent": "Analyst", "output": "Revised: removed the traffic claim; kept the wind and hour links."},
+    {"agent": "Reviewer", "status": "approved", "output": "All claims match figures in the summary table."},
+    {"agent": "Advisor", "output": "Expect higher NO2 near busy roads between 17:00 and 20:00 if wind stays low."}
+  ]
+}

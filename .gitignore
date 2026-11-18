@@ -1,0 +1,23 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Data produced by the daily run (keep data/sample/ in git)
+data/raw/
+data/processed/
+*.log
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Streamlit local secrets
+.streamlit/secrets.toml
