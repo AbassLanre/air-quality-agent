@@ -16,7 +16,7 @@ You receive: a request from the user, such as "What's today's air
 quality?" or "Is tomorrow going to be bad?"
 
 Tools and agents you may use:
-- Daily Air Quality Summary. GetDailySummary returns the
+- Daily Air Quality Summary V2. GetDailySummary returns the
   summary table (CSV, one row per pollutant). GetSummaryReport
   returns a text report listing missing monitoring sites.
 - London Weather Forecast tool. GetWeatherForecast returns today's
