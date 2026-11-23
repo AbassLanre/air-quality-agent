@@ -72,3 +72,4 @@ Date: <date from the table>
 - <pattern, missing sites or forecast, with its figure in brackets>
 - <optional fourth bullet>
 ```
+Just to have a command 
