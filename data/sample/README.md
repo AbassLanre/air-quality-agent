@@ -1,97 +1,41 @@
-# data/ (Carlos, Daniel)
+# data/sample/ (agreed handover files)
 
-Python that fetches, cleans and summarises London air quality and weather data.
-Status: working and tested on 21 Nov 2026 (Windows, Python 3.15).
+- `sample_summary.csv`: real output of `python data/summarise.py` for 20 Nov 2026, in exactly the
+  shape the daily run publishes to `data/latest/summary.csv`. The agents, the Streamlit page and the
+  tests build against it. NO2 that day was at the 91st percentile, so it is a useful "Serious day"
+  test case.
+- `sample_result.json`: example of what the agents hand to the Streamlit page (invented).
 
-## The one daily command
+Changing a column means telling PercyAbs first, because the agents and the page both read these names.
 
-Run from the project folder:
+## sample_summary.csv columns
 
-```
-python data/summarise.py --fetch
-```
+One row per pollutant (NO2, PM2.5, PM10, O3) for one day. All times are GMT. Every number comes
+from code; the agents never calculate.
 
-First run about 1-5 minutes (downloads 365 days); after that about 10 seconds, because finished
-months are cached in `data/raw/`. No API keys are needed for the data.
-
-## Scripts
-
-| Script | What it does | Writes |
+| Column | Meaning | Unit |
 | --- | --- | --- |
-| `fetch.py` | Downloads hourly readings for a fixed panel of 8 London Air sites and hourly central-London weather from Open-Meteo, for the last 365 days. Keeps every raw download as a cache and tidies them into two hourly tables (all times GMT). | `data/raw/`, `data/processed/air_hourly.csv`, `weather_hourly.csv`, `fetch_report.txt` |
-| `summarise.py` | Cleans to daily values (a site's day counts only with 18 of 24 hours), averages the panel sites, adds the day's weather, calculates the links over the last 365 days, and adds the official daily index. | `data/processed/summary.csv`, `daily.csv`, `summary_report.txt` |
+| city | City name (London) | |
+| date | Day the data covers, usually yesterday | YYYY-MM-DD |
+| pollutant | NO2, PM2.5, PM10 or O3 | |
+| avg_ugm3 | Average of the panel sites that had a full day (at least 18 of 24 hourly values) | µg/m³ |
+| peak_ugm3 | Highest single hourly value at any panel site that day | µg/m³ |
+| peak_hour | Hour of that peak | 0 to 23 |
+| sites_reporting | Panel sites with a full day of data for this pollutant | count |
+| sites_missing | Panel sites without a full day of data for this pollutant | count |
+| wind_avg_kmh | Mean wind speed, central London (Open-Meteo) | km/h |
+| rain_total_mm | Total rain that day | mm |
+| temp_avg_c | Mean temperature | °C |
+| mixing_height_m | Mean mixing height: how deep the air layer is that pollution can spread into | m |
+| link_wind | Spearman correlation between the daily pollutant average and daily wind, over the 365 days up to this date. Negative = more wind, less pollution | -1 to 1 |
+| link_rain | Same, with daily rain | -1 to 1 |
+| link_temp | Same, with daily mean temperature. Over a year this mostly reflects the seasons | -1 to 1 |
+| link_mixing | Same, with daily mixing height | -1 to 1 |
+| typical_peak_hour | Hour of day with the highest average over the same 365 days | 0 to 23 |
+| weekday_vs_weekend_pct | How much higher (+) or lower (-) the average is on weekdays (Mon to Fri) than at weekends, over the same 365 days | % |
+| today_percentile | % of the past 365 days with an average at or below this day's average. 91 = worse than 91% of days | 0 to 100 |
+| daqi_max | Highest official Daily Air Quality Index for this pollutant across all London Air sites that day. Blank if not published yet | 1 to 10 |
+| window_days | Days of history behind the link figures | count |
 
-Other options:
-- `python data/summarise.py --date 2026-11-05` gives the summary for any past day (test days).
-- `python data/fetch.py --days 30` downloads a shorter period.
-
-## Outputs
-
-- `summary.csv`: one day, one row per pollutant (NO2, PM2.5, PM10, O3). This is what the agents read.
-  Some columns are that day's values; the link columns, `typical_peak_hour`,
-  `weekday_vs_weekend_pct` and `today_percentile` are calculated over the 365 days up to that day.
-  Every column is explained at the top of `summarise.py`.
-- `daily.csv`: every day of the last 365 days (for charts and choosing test days).
-- `summary_report.txt`: the same summary as text, plus which sites had no full day of data.
-
-## For the agents (Lanre)
-
-- Daily run: a GitHub Actions workflow runs `python data/summarise.py --fetch` once a day and
-  publishes `data/latest/summary.csv`. Lanre owns the workflow and the copy to `data/latest/`.
-- The agents read `data/latest/summary.csv`. Column meanings: `data/sample/README.md`.
-- Notes for the workflow:
-  - `data/raw/` is not committed, so each run downloads the full 365 days (about 1-5 minutes).
-    Caching `data/raw/` between runs (for example with GitHub's cache action) cuts this to seconds.
-  - Install with `pip install -r requirements.txt`. No keys are needed for the data.
-    Tested on Python 3.12 and 3.15.
-  - If the run happens before London Air publishes the official daily index, `daqi_max` is blank.
-    Running later in the day makes it more likely to be filled.
-  - `data/processed/summary_report.txt` lists the sites without a full day of data, which is
-    useful for the Collector; it is worth copying to `data/latest/` as well.
-  - `fetch.py` retries each download three times and lists any failed months in `fetch_report.txt`.
-    `summarise.py` stops with an error if there is no data to summarise.
-
-## Site panel
-
-Chosen because each pollutant at each site had a value in at least 80% of hours over the past year.
-
-| Site | Name | Type | Pollutants |
-| --- | --- | --- | --- |
-| HP1 | Lewisham - Honor Oak Park | background | NO2, PM2.5, PM10, O3 |
-| KC1 | Kensington and Chelsea - North Kensington | background | NO2, O3 |
-| TH6 | Tower Hamlets - Millwall Park | background | NO2, O3 |
-| CW3 | Jubilee Park | background | PM2.5, PM10 |
-| MY1 | Westminster - Marylebone Road | roadside | NO2 |
-| BT4 | Brent - Ikea | roadside | NO2, PM2.5, PM10 |
-| CE2 | Waterloo Place | roadside | NO2, PM2.5, PM10 |
-| TH4 | Tower Hamlets - Blackwall | roadside | NO2 |
-
-## Changes from the original plan (approved by Lanre, 23 Nov 2026)
-
-- Links over 365 days instead of 30: 30 days is too few for reliable links. The history comes from
-  the same two sources, so no new data source was added.
-- Hour of day: `typical_peak_hour` instead of `link_hour`, because hour of day is a clock (0-23)
-  and a correlation with it is misleading (NO2 peaks twice a day).
-- Weekday: `weekday_vs_weekend_pct`.
-- Added `mixing_height_m`, `link_mixing`, `today_percentile` and `daqi_max`.
-- A fixed panel of 8 reliable sites instead of whichever sites report each day.
-- There is no separate `clean.py`: cleaning happens inside `fetch.py` and `summarise.py`.
-
-## Rules
-
-- Raw and processed data are not committed (see `.gitignore`); only the scripts and notes are.
-  The exception is `data/latest/summary.csv`, which the daily workflow publishes.
-- Data limitations: see `limitations.md`.
-
-## Done when
-
-- [x] One command fetches today's data and writes the summary
-- [x] Three figures checked by hand against the source websites (see below)
-
-## Hand checks (22 Nov 2026)
-
-| Figure | Source value | Our value | Match |
-| --- | --- | --- | --- |
-| HP1 NO2, 15 Nov 00:00-02:00 (London Air) | 41.2, 47.0, 45.1 | 41.2, 47.0, 45.1 | Yes |
-| Temperature, 15 Nov 00:00-02:00 (Open-Meteo) | 2.9, 2.8, 2.8 °C | 2.9, 2.8, 2.8 °C | Yes |
-| Rain total and mean temperature, 20 Nov (calculated) | 0.5 mm, 6.6 °C | 0.5 mm, 6.6 °C | Yes |
+Links are correlations: they show that two things move together, not that one causes the other.
+See `data/limitations.md`.
