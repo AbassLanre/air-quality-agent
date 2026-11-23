@@ -1,0 +1,19 @@
+swagger: "2.0"
+info:
+  title: Air Quality Daily Summary
+  version: "1.0"
+host: raw.githubusercontent.com
+basePath: /abasslanre/air-quality-agent/main
+schemes: [https]
+paths:
+  /data/latest/summary.csv:
+    get:
+      operationId: GetDailySummary
+      summary: Get today's air quality summary
+      description: Returns the latest daily air quality and weather summary for London as CSV text.
+      produces: [text/plain]
+      responses:
+        "200":
+          description: The summary table as CSV text
+          schema:
+            type: string
