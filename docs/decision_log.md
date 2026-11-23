@@ -21,3 +21,4 @@
 | 2026-11-23 | Alerts on Serious days only, no routine daily report | A daily message would be ignored; alerts keep attention for days that matter | PercyAbs |
 | 2026-11-23 | Streamlit shows the data, Copilot Studio shows the agents; both read `data/latest/` | Agent answers cannot reach Streamlit automatically; keeping them separate is simplest and honest | PercyAbs |
 | 2026-11-23 | Data tool reads JSON files (`summary.json`, `summary_report.json`) instead of the raw CSV and text | Copilot Studio REST tools expect JSON and failed on plain text ("'S' is an invalid start of a value"); the workflow now wraps the CSV and report in JSON | PercyAbs |
+| 2026-11-23 | Coordinator carries on if only the report fails; stops only if the summary fails | The summary already has sites_missing, so a missing report should not block the whole assessment | PercyAbs |
