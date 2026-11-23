@@ -1,30 +1,47 @@
 swagger: "2.0"
 info:
   title: Daily Air Quality Summary
-  version: "1.1"
+  version: "1.2"
 host: raw.githubusercontent.com
 basePath: /abasslanre/air-quality-agent/main
 schemes: [https]
 paths:
-  /data/latest/summary.csv:
+  /data/latest/summary.json:
     get:
       operationId: GetDailySummary
       summary: Get the latest daily air quality summary
-      description: Returns the latest full day's air quality and weather summary for London as CSV text, one row per pollutant (NO2, PM2.5, PM10, O3). The date column says which day the data covers.
-      produces: [text/plain]
+      description: Returns the latest full day's air quality and weather summary for London. The summary_csv field holds the table as CSV text, one row per pollutant (NO2, PM2.5, PM10, O3). The date field says which day the data covers.
+      produces: [application/json]
       responses:
         "200":
-          description: The summary table as CSV text
+          description: The daily summary
           schema:
-            type: string
-  /data/latest/summary_report.txt:
+            type: object
+            properties:
+              city:
+                type: string
+                description: City the summary covers (London).
+              date:
+                type: string
+                description: Day the data covers, usually yesterday (YYYY-MM-DD).
+              summary_csv:
+                type: string
+                description: The summary table as CSV text, one row per pollutant. Column meanings are in data/sample/README.md.
+  /data/latest/summary_report.json:
     get:
       operationId: GetSummaryReport
       summary: Get the latest summary report, including missing sites
       description: Returns a short text report for the same day, listing which monitoring sites had no full day of data and whether the official daily index has been published.
-      produces: [text/plain]
+      produces: [application/json]
       responses:
         "200":
-          description: The report as plain text
+          description: The daily report
           schema:
-            type: string
+            type: object
+            properties:
+              date:
+                type: string
+                description: Day the report covers (YYYY-MM-DD).
+              report:
+                type: string
+                description: The report as plain text, including the list of sites without a full day of data.

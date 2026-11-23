@@ -37,6 +37,22 @@ jobs:
           cp data/processed/summary_report.txt data/latest/summary_report.txt
           cp data/processed/daily.csv data/latest/daily.csv
 
+      - name: Wrap the summary and report as JSON for Copilot Studio
+        run: |
+          python - <<'PY'
+          import csv, json
+          from pathlib import Path
+          latest = Path("data/latest")
+          csv_text = (latest / "summary.csv").read_text(encoding="utf-8")
+          rows = list(csv.DictReader(csv_text.splitlines()))
+          date = rows[0]["date"] if rows else ""
+          (latest / "summary.json").write_text(json.dumps(
+              {"city": "London", "date": date, "summary_csv": csv_text}), encoding="utf-8")
+          report = (latest / "summary_report.txt").read_text(encoding="utf-8")
+          (latest / "summary_report.json").write_text(json.dumps(
+              {"date": date, "report": report}), encoding="utf-8")
+          PY
+
       - name: Save today's summary
         run: |
           git config user.name "github-actions"
