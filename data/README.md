@@ -36,11 +36,20 @@ Other options:
 
 ## For the agents (Lanre)
 
-- The tool to press: `python data/summarise.py --fetch`, then read `data/processed/summary.csv`
-  and `summary_report.txt` (missing sites, for the Collector).
-- Copilot Studio cannot run Python on a laptop unless the code is put online (out of scope).
-  Simplest bridge: save `summary.csv` where the agents can read it (for example a shared OneDrive
-  folder), or upload it to the agents.
+- Daily run: a GitHub Actions workflow runs `python data/summarise.py --fetch` once a day and
+  publishes `data/latest/summary.csv`. Lanre owns the workflow and the copy to `data/latest/`.
+- The agents read `data/latest/summary.csv`. Column meanings: `data/sample/README.md`.
+- Notes for the workflow:
+  - `data/raw/` is not committed, so each run downloads the full 365 days (about 1-5 minutes).
+    Caching `data/raw/` between runs (for example with GitHub's cache action) cuts this to seconds.
+  - Install with `pip install -r requirements.txt`. No keys are needed for the data.
+    Tested on Python 3.12 and 3.15.
+  - If the run happens before London Air publishes the official daily index, `daqi_max` is blank.
+    Running later in the day makes it more likely to be filled.
+  - `data/processed/summary_report.txt` lists the sites without a full day of data, which is
+    useful for the Collector; it is worth copying to `data/latest/` as well.
+  - `fetch.py` retries each download three times and lists any failed months in `fetch_report.txt`.
+    `summarise.py` stops with an error if there is no data to summarise.
 
 ## Site panel
 
@@ -57,7 +66,7 @@ Chosen because each pollutant at each site had a value in at least 80% of hours 
 | CE2 | Waterloo Place | roadside | NO2, PM2.5, PM10 |
 | TH4 | Tower Hamlets - Blackwall | roadside | NO2 |
 
-## Changes from the original plan (to confirm with PercyAbs / Lanre)
+## Changes from the original plan (approved by Lanre, 23 Nov 2026)
 
 - Links over 365 days instead of 30: 30 days is too few for reliable links. The history comes from
   the same two sources, so no new data source was added.
@@ -71,9 +80,18 @@ Chosen because each pollutant at each site had a value in at least 80% of hours 
 ## Rules
 
 - Raw and processed data are not committed (see `.gitignore`); only the scripts and notes are.
+  The exception is `data/latest/summary.csv`, which the daily workflow publishes.
 - Data limitations: see `limitations.md`.
 
 ## Done when
 
 - [x] One command fetches today's data and writes the summary
-- [ ] Three figures checked by hand against the source websites
+- [x] Three figures checked by hand against the source websites (see below)
+
+## Hand checks (22 Nov 2026)
+
+| Figure | Source value | Our value | Match |
+| --- | --- | --- | --- |
+| HP1 NO2, 15 Nov 00:00-02:00 (London Air) | 41.2, 47.0, 45.1 | 41.2, 47.0, 45.1 | Yes |
+| Temperature, 15 Nov 00:00-02:00 (Open-Meteo) | 2.9, 2.8, 2.8 °C | 2.9, 2.8, 2.8 °C | Yes |
+| Rain total and mean temperature, 20 Nov (calculated) | 0.5 mm, 6.6 °C | 0.5 mm, 6.6 °C | Yes |
