@@ -42,8 +42,8 @@ just the first one.
   are fine.
 - ADJECTIVE: a weather value is described with a judgement word ("low wind",
   "calm", "cold", "dry day"), when the table gives no comparison for it.
-- SEASONAL: the bullet uses link_temp. The Analyst leaves link_temp out,
-  because over a year it mostly reflects the seasons.
+- - SEASONAL: link_temp appears in bullet 1 or 2, or is used anywhere without
+  saying it largely reflects seasonal change.
 - ORDER: bullet 1 is not the pollutant with the highest today_percentile; or
   bullet 2 is not the link value furthest from 0 across all pollutants,
   excluding link_temp (or does not name its pollutant); or bullet 2 says no
