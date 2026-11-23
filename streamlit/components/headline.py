@@ -1,20 +1,6 @@
-import pandas as pd
 import streamlit as st
 
-
-def index_text(value):
-    if pd.isna(value):
-        return "Official index: not published"
-    value = int(value)
-    if value <= 3:
-        band = "Low"
-    elif value <= 6:
-        band = "Moderate"
-    elif value <= 9:
-        band = "High"
-    else:
-        band = "Very high"
-    return f"Official index: {value} ({band})"
+from components.badge import index_badge
 
 
 def show_headline(summary):
@@ -22,6 +8,7 @@ def show_headline(summary):
 
     columns = st.columns(4)
     for col, (_, row) in zip(columns, summary.iterrows()):
-        col.metric(row["pollutant"], f"{row['avg_ugm3']} µg/m³")
-        col.write(f"Worse than {row['today_percentile']}% of days this year")
-        col.write(index_text(row["daqi_max"]))
+        with col.container(border=True):
+            st.metric(row["pollutant"], f"{row['avg_ugm3']} µg/m³")
+            st.write(f"Worse than **{row['today_percentile']}%** of days this year")
+            st.markdown(index_badge(row["daqi_max"]), unsafe_allow_html=True)

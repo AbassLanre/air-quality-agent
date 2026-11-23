@@ -1,6 +1,8 @@
 import plotly.express as px
 import streamlit as st
 
+from config import POLLUTANT_COLOURS
+
 FACTORS = {
     "link_wind": "Wind speed",
     "link_rain": "Rain",
@@ -31,7 +33,18 @@ def show_weather_links(summary):
         y="link",
         color="pollutant",
         barmode="group",
-        labels={"link": "Link (-1 to +1)", "factor": "", "pollutant": "Pollutant"},
+        color_discrete_map=POLLUTANT_COLOURS,
+        labels={"link": "Link (-1 to +1)", "factor": "", "pollutant": ""},
     )
     fig.update_yaxes(range=[-1, 1])
-    st.plotly_chart(fig, use_container_width=True)
+    fig.update_traces(
+        hovertemplate="%{x}<br>%{fullData.name}: %{y:.2f}<extra></extra>"
+    )
+    fig.update_layout(
+        height=380,
+        margin=dict(l=10, r=10, t=40, b=10),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0),
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
+    )
+    st.plotly_chart(fig)
