@@ -1,0 +1,77 @@
+swagger: "2.0"
+info:
+  title: London Weather Forecast
+  description: Open-Meteo weather forecast for central London. Free, no key needed.
+  version: "1.0"
+host: api.open-meteo.com
+basePath: /v1
+schemes: [https]
+paths:
+  /forecast:
+    get:
+      operationId: GetWeatherForecast
+      summary: Get the weather forecast for London for today and tomorrow
+      description: >-
+        Returns daily forecast values for central London for today and tomorrow:
+        mean and maximum wind speed (km/h), total rain (mm) and mean temperature (C).
+        Use it to judge whether high pollution is likely to persist or clear.
+        Low wind and no rain usually mean pollution builds up; strong wind or rain
+        usually disperses it.
+      produces: [application/json]
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          type: number
+          default: 51.5074
+          x-ms-visibility: internal
+        - name: longitude
+          in: query
+          required: true
+          type: number
+          default: -0.1278
+          x-ms-visibility: internal
+        - name: daily
+          in: query
+          required: true
+          type: string
+          default: wind_speed_10m_mean,wind_speed_10m_max,precipitation_sum,temperature_2m_mean
+          x-ms-visibility: internal
+        - name: timezone
+          in: query
+          required: true
+          type: string
+          default: GMT
+          x-ms-visibility: internal
+        - name: forecast_days
+          in: query
+          required: true
+          type: integer
+          default: 2
+          x-ms-visibility: internal
+      responses:
+        "200":
+          description: Daily forecast values for today and tomorrow
+          schema:
+            type: object
+            properties:
+              daily_units:
+                type: object
+              daily:
+                type: object
+                properties:
+                  time:
+                    type: array
+                    items: {type: string}
+                  wind_speed_10m_mean:
+                    type: array
+                    items: {type: number}
+                  wind_speed_10m_max:
+                    type: array
+                    items: {type: number}
+                  precipitation_sum:
+                    type: array
+                    items: {type: number}
+                  temperature_2m_mean:
+                    type: array
+                    items: {type: number}

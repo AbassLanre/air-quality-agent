@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-  title: Air Quality Daily Summary
-  version: "1.0"
+  title: Daily Air Quality Summary
+  version: "1.1"
 host: raw.githubusercontent.com
 basePath: /abasslanre/air-quality-agent/main
 schemes: [https]
@@ -9,11 +9,22 @@ paths:
   /data/latest/summary.csv:
     get:
       operationId: GetDailySummary
-      summary: Get today's air quality summary
-      description: Returns the latest daily air quality and weather summary for London as CSV text.
+      summary: Get the latest daily air quality summary
+      description: Returns the latest full day's air quality and weather summary for London as CSV text, one row per pollutant (NO2, PM2.5, PM10, O3). The date column says which day the data covers.
       produces: [text/plain]
       responses:
         "200":
           description: The summary table as CSV text
+          schema:
+            type: string
+  /data/latest/summary_report.txt:
+    get:
+      operationId: GetSummaryReport
+      summary: Get the latest summary report, including missing sites
+      description: Returns a short text report for the same day, listing which monitoring sites had no full day of data and whether the official daily index has been published.
+      produces: [text/plain]
+      responses:
+        "200":
+          description: The report as plain text
           schema:
             type: string

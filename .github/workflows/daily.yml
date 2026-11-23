@@ -35,6 +35,7 @@ jobs:
           mkdir -p data/latest
           cp data/processed/summary.csv data/latest/summary.csv
           cp data/processed/summary_report.txt data/latest/summary_report.txt
+          cp data/processed/daily.csv data/latest/daily.csv
 
       - name: Save today's summary
         run: |
