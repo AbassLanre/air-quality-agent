@@ -1,0 +1,43 @@
+name: Hourly traffic snapshot
+
+# TfL only publishes the current road status, so we save a snapshot every hour
+# to build up the history. (The daily workflow runs once a day, which is not enough.)
+
+on:
+  schedule:
+    - cron: "10 * * * *"    # 10 minutes past every hour, UTC
+  workflow_dispatch:        # adds a "Run workflow" button for testing
+
+permissions:
+  contents: write           # lets the run save the history file back to the repo
+
+# Never run two jobs that push to the repo at the same time
+concurrency:
+  group: repo-writes
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Save TfL road status
+        env:
+          TFL_APP_KEY: ${{ secrets.TFL_APP_KEY }}   # optional; leave the secret unset if not needed
+        run: python data/fetch_traffic.py --poll
+
+      - name: Commit the history
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data/traffic/traffic_status.csv
+          git commit -m "Traffic snapshot $(date -u +%FT%H:%MZ)" || echo "No change"
+          git pull --rebase
+          git push
