@@ -11,51 +11,142 @@ real data.
 | Answers | "What does it mean and what should we do?" | "What actually happened?" |
 | Updates | When someone asks the agent | Every morning, automatically |
 
-## Data to read
+The page is **read-only**. It never fetches air data, calculates anything new, or calls the agents.
+It downloads the same files the agents read and draws them.
 
-Read the same files the agents read, straight from GitHub, so the page and the agent always show
-the same day. GitHub Actions refreshes them every morning at 06:00 UTC.
+---
 
-| File | Address | Contents |
-| --- | --- | --- |
-| Summary | https://raw.githubusercontent.com/abasslanre/air-quality-agent/main/data/latest/summary.csv | Yesterday, one row per pollutant (NO2, PM2.5, PM10, O3) |
-| Report | https://raw.githubusercontent.com/abasslanre/air-quality-agent/main/data/latest/summary_report.txt | Missing sites, whether the official index is published |
-| History | https://raw.githubusercontent.com/abasslanre/air-quality-agent/main/data/latest/daily.csv (available after the next daily run) | Every day of the past year, for charts |
+## Run the page
 
-Column meanings are at the top of `data/summarise.py`. Use `pd.read_csv(url)`; no key needed.
-Cache with `@st.cache_data(ttl=3600)` so the page does not re-download on every click.
+You need Python 3.11 or newer and Git. These steps are for Windows using Git Bash. Run all
+commands from the **repo root** (the `air-quality-agent` folder), not from inside `streamlit/`.
+The root matters because `.streamlit/config.toml` (the page theme) is read from where you start
+Streamlit.
 
-## What to build
+**1. Create the virtual environment (first time only).**
 
-1. **Headline panel**: for each pollutant, yesterday's average, the percentile
-   ("worse than 81% of days this year", from `today_percentile`) and the official index (`daqi_max`).
-   State the date clearly; never call it live.
-2. **Trend charts** (Plotly): the last 30 to 90 days per pollutant from `daily.csv`.
-3. **Weather link charts**: each pollutant against wind speed (and rain, mixing height), with the
-   link figure (`link_wind` etc.) shown beside it. Label it "linked to", not "caused by".
-4. **Typical daily pattern**: highlight `typical_peak_hour`.
-5. **Data issues**: missing sites from the report.
-6. **"Ask the agent" link** to the published Copilot Studio agent.
-7. **Saved-results mode** (demo backup): a few agent answers saved as JSON in `data/results/`,
-   in the shape of `data/sample/sample_result.json`, shown in a tab. The demo still works if the
-   internet or the agent fails.
+```
+python -m venv ~/aqenv
+```
 
-## Optional: the agent inside the page
+The environment is deliberately made in a short location (`C:\Users\<you>\aqenv`). If the repo
+sits in a folder with a long name, installing Streamlit inside the repo fails with a Windows
+"path not found" error, because some of its files have very long paths.
 
-Copilot Studio's Channels tab may offer a website embed code. If the school account allows it, the
-agent's chat can sit in a Streamlit tab (`st.components.v1.html`), giving one screen for
-everything. PercyAbs is checking this; do not depend on it.
+**2. Switch it on (every time you open a new terminal).**
 
-## Hosting
+```
+source ~/aqenv/Scripts/activate
+```
 
-Free on Streamlit Community Cloud, connected to this public repo, main file `streamlit/app.py`.
-It then refreshes with each morning's data without anyone touching it.
+You should see `(aqenv)` at the start of the line. Use forward slashes in Git Bash.
+(In Command Prompt it is `%USERPROFILE%\aqenv\Scripts\activate`. On Mac or Linux it is
+`source ~/aqenv/bin/activate`.)
 
-Run locally (with the venv active):
+**3. Install the libraries (first time only).**
+
+```
+pip install streamlit pandas plotly requests
+```
+
+**4. Start the page.**
 
 ```
 streamlit run streamlit/app.py
 ```
+
+A browser tab opens at http://localhost:8501. If Streamlit asks for an email, press Enter to skip.
+Leave the terminal running. The page refreshes when you save a file. To stop it, click in the
+terminal and press **Ctrl+C**.
+
+---
+
+## Data the page reads
+
+The page reads the same files the agents read, straight from GitHub, so both always show the same
+day. GitHub Actions refreshes them every morning at 06:00 UTC. No key is needed.
+
+| File | Address | Used for |
+| --- | --- | --- |
+| Summary | `https://raw.githubusercontent.com/abasslanre/air-quality-agent/main/data/latest/summary.csv` | Yesterday, one row per pollutant |
+| Report | `https://raw.githubusercontent.com/abasslanre/air-quality-agent/main/data/latest/summary_report.txt` | When the report was made, and which sites are missing |
+| History | `https://raw.githubusercontent.com/abasslanre/air-quality-agent/main/data/latest/daily.csv` | Trend charts (not published yet) |
+
+Column meanings are at the top of `data/summarise.py`. Downloads are remembered for one hour
+(`@st.cache_data(ttl=3600)`), so the page does not re-download on every click.
+
+---
+
+## What is built
+
+Last updated: 23 Nov 2026.
+
+| Spec item | Status |
+| --- | --- |
+| Headline panel: yesterday's average, percentile, official index with colour badge, date, never "live" | Done |
+| Yesterday's weather (wind, rain, temperature, mixing height) | Done |
+| Weather link chart (each pollutant against wind, rain, temperature, mixing height), worded "linked to", not "caused by" | Done |
+| Typical daily pattern: usual peak hour against yesterday's peak hour | Done |
+| Data issues: missing monitoring sites by name, and whether the official index was published | Done |
+| Friendly message and "Try again" button if the data cannot be loaded | Done |
+| Mobile layout (cards stack, charts fit the screen) | Done, checked at phone width |
+| "Ask the agent" button | Built, waiting for the published agent link |
+| Saved-results tab (demo backup from `data/results/`) | Not started, waiting for `data/sample/sample_result.json` |
+| Trend charts, last 30 to 90 days | Not started, waiting for `daily.csv` to be published |
+| Scatter charts (pollutant against wind, rain, mixing height) | Not started, waiting for `daily.csv` |
+| Hosting on Streamlit Community Cloud | Not started, needs the branch merged into `main` |
+
+Every figure on the page matches `data/latest/summary.csv`. The collapsed "Source data" box at the
+bottom of the page shows the exact rows for checking.
+
+---
+
+## How the code is organised
+
+Each section of the page is its own small file, so one can be changed, added or removed without
+touching the others.
+
+```
+streamlit/
+├── app.py                  Builds the page. Loads the data, then calls each section in order.
+├── config.py               Web addresses, colours and the agent link. Change settings here.
+├── loaders.py              Downloads and reads the files, and handles download failures.
+└── components/
+    ├── __init__.py         Empty file that marks this folder as a package.
+    ├── ask_agent.py        "Ask the agent" box.
+    ├── badge.py            Coloured official-index label (UK DAQI colours).
+    ├── headline.py         The four pollutant cards.
+    ├── weather_strip.py    Yesterday's weather tiles.
+    ├── weather_links.py    Weather link bar chart.
+    ├── daily_pattern.py    Usual peak against yesterday's peak chart.
+    └── data_issues.py      Missing-site warnings.
+.streamlit/
+└── config.toml             Page theme (in the repo root, outside this folder).
+```
+
+### Add a new section
+
+1. Create `components/my_section.py` with a function such as `show_my_section(summary)`.
+2. In `app.py`, import it and add one call in the order you want it on the page.
+
+### Change a setting
+
+- **Agent link:** paste the published Copilot Studio link into `AGENT_URL` in `config.py`. The
+  greyed-out button becomes a working one.
+- **Pollutant colours:** edit `POLLUTANT_COLOURS` in `config.py`. They apply to every chart.
+- **Index colours:** edit `DAQI_COLOURS` in `config.py`.
+- **Data addresses:** edit `BASE_URL` in `config.py`.
+
+---
+
+## Testing the error message
+
+1. In `config.py`, change `summary.csv` in the address to `summaryXX.csv` and save.
+2. Stop Streamlit (Ctrl+C) and start it again, because a restart clears the remembered data.
+3. The page should show a red message and a "Try again" button, and nothing else.
+4. Change the address back and click **Try again**.
+
+---
 
 ## Demo flow
 
@@ -65,7 +156,17 @@ streamlit run streamlit/app.py
 3. On a Serious day, the alert draft arrives in Teams for approval; approve it live.
 4. Back to Streamlit: the figures the agent quoted are on the page.
 
+---
+
 ## Done when
 
 Someone who has never seen the project can open the page and understand yesterday's air quality
 without help, and every figure on it matches `data/latest/summary.csv`.
+
+## Working rules
+
+- Work on branch `ade/page` and only change files in `streamlit/` (plus `.streamlit/config.toml`).
+- Do not rename the columns of `data/sample/sample_summary.csv` or the fields of
+  `data/sample/sample_result.json`.
+- Never commit keys or passwords.
+- Any decision goes in `docs/decision_log.md` with the date and the reason.
