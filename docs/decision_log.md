@@ -24,3 +24,12 @@
 | 2026-11-23 | Coordinator carries on if only the report fails; stops only if the summary fails | The summary already has sites_missing, so a missing report should not block the whole assessment | PercyAbs |
 | 2026-11-23 | Coordinator must treat every question, including weather-only ones, as an air quality assessment; no unit conversions or own advice | In testing it answered "weather today" as a weather bot, skipped the data tool and agents, converted to °F and gave clothing advice | PercyAbs |
 | 2026-11-23 | Alert built as an agent flow: draft sent to a person by Outlook (Request for information), emailed to the team only if approved | Copilot Studio human review sends through Outlook; flow replies to the agent first so the chat does not wait for approval | PercyAbs |
+| 2026-11-24 | fetch_traffic.py merged into fetch.py; one script fetches air, weather, boundary layer and traffic | One command and one place to maintain; summarise.py --fetch needs no change | Daniel |
+| 2026-11-24 | New hourly_merged.csv: one row per GMT hour with air quality, weather, boundary layer and traffic; gaps left blank | Lets the analysis compare the same hour across all sources; nothing is filled in | Daniel |
+| 2026-11-24 | Run date taken from the GMT clock instead of the computer's local date | Local runs and GitHub (UTC) cut the data at the same hour | Daniel |
+| 2026-11-24 | Traffic from TfL road status, saved by snapshots in data/traffic/traffic_status.csv | TfL's /Road gives only the current status; no hourly history exists to download | Daniel |
+| 2026-11-24 | Traffic polled every 3 hours instead of every hour | Cuts commits to main from about 24 to 8 a day | Daniel |
+| 2026-11-24 | Rush windows (06-09 and 15-18 UTC) polled every 30 min; 01, 04, 12, 22 UTC once each	| Rush hour matters most for pollution, and the windows cover both GMT and BST; 20 runs a day | Daniel |
+| 2026-11-24 | Traffic day counts only with 9 of 12 polled hours; replaces the 18-of-24 rule | The old rule would have discarded every day under the new schedule | Daniel |
+| 2026-11-24 | TfL past-date status query not used for now | One value per window, not hourly; looks like worst disruption status, so it is a different, weaker measure | Daniel |
+| 2026-11-24 | Traffic described as "disruption status", not "congestion" | Evidence points to disruption records (roadworks, incidents), not measured flow | Daniel |
