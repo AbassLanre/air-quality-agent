@@ -1,10 +1,10 @@
-Summary for London, 2026-11-25  (made 2026-11-26 16:23)
+Summary for London, 2026-11-26  (made 2026-11-27 16:05)
 
 pollutant  avg_ugm3  peak_ugm3  peak_hour  sites_reporting  sites_missing  wind_avg_kmh  rain_total_mm  temp_avg_c  mixing_height_m  link_wind  link_rain  link_temp  link_mixing  typical_peak_hour  weekday_vs_weekend_pct  today_percentile  daqi_max  window_days
-      NO2      33.1       61.2          7                6              1          11.4            0.0         4.6              626      -0.63      -0.12      -0.20        -0.69                 19                      14                85         1          365
-    PM2.5      13.6       26.1         21                4              0          11.4            0.0         4.6              626      -0.41      -0.28      -0.17        -0.47                 22                      -1                87         2          365
-     PM10      23.5       44.0         12                4              0          11.4            0.0         4.6              626      -0.45      -0.40       0.01        -0.37                  8                      10                85         3          365
-       O3      25.3       48.8         12                2              1          11.4            0.0         4.6              626       0.21      -0.15       0.45         0.65                 14                      -3                 6         2          365
+      NO2      32.3       90.3         17                6              1           9.9            0.0         4.1              607      -0.62      -0.13      -0.20        -0.69                 19                      13                84         2          365
+    PM2.5      17.8       30.9         23                4              0           9.9            0.0         4.1              607      -0.41      -0.28      -0.18        -0.47                 22                      -1                93         2          365
+     PM10      30.2       78.0         12                4              0           9.9            0.0         4.1              607      -0.45      -0.40       0.01        -0.37                  8                      11                93         3          365
+       O3      25.9       41.1         12                2              1           9.9            0.0         4.1              607       0.21      -0.14       0.45         0.64                 14                      -3                 7         2          365
 
 Panel sites without a full day of data:
    NO2    KC1
