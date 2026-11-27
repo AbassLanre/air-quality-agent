@@ -33,3 +33,9 @@
 | 2026-11-24 | Traffic day counts only with 9 of 12 polled hours; replaces the 18-of-24 rule | The old rule would have discarded every day under the new schedule | Daniel |
 | 2026-11-24 | TfL past-date status query not used for now | One value per window, not hourly; looks like worst disruption status, so it is a different, weaker measure | Daniel |
 | 2026-11-24 | Traffic described as "disruption status", not "congestion" | Evidence points to disruption records (roadworks, incidents), not measured flow | Daniel |
+| 2026-11-27 | Traffic data dropped: traffic.yml, TfL polling, data/traffic/ and the traffic code in fetch.py removed. Supersedes the 24 Nov traffic rows above | TfL gives disruption status (roadworks, incidents), not traffic volume, and history would only start on 27 Nov: under 3 weeks by 14 Dec, too little for a reliable link | PercyAbs |
+| 2026-11-27 | hourly_merged.csv kept, without traffic columns | One row per hour of air quality, weather and boundary layer is the input the forecast model needs | PercyAbs |
+| 2026-11-27 | Project focus changed to forecasting: predict London air quality 1 and 2 days ahead from past air quality and the weather forecast | Warning people before a bad day is more useful than reporting it afterwards, and gives the agents a real decision to make | PercyAbs |
+| 2026-11-27 | Forecast made by a Python script in GitHub Actions; agents read it, they do not predict | An LLM asked to forecast would invent numbers that change each time (same reason the code interpreter is not used) | PercyAbs |
+| 2026-11-27 | Forecast horizon capped at 2 days | Weather forecasts, the main input, lose accuracy quickly after 2 days | PercyAbs |
+| 2026-11-27 | Forecast judged against two benchmarks: "tomorrow = today" and the CAMS European forecast (Open-Meteo air quality API) | The model is only worth using if it beats the simple guess; CAMS shows how close we get to a professional forecast | PercyAbs |
