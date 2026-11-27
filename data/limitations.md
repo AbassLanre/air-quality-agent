@@ -13,3 +13,4 @@
 - The official index (`daqi_max`) covers all London Air sites, not only our 8-site panel.
 - Boundary layer height is modelled for one point in central London, not measured.
 - Hourly values may be one hour out if the providers' timestamp conventions differ (not yet checked).
+- Forecast (planned): the model learns from the weather that actually happened, but runs live on the weather forecast, which can be wrong, so live accuracy will be lower than the backtest. It predicts at most 2 days ahead.
