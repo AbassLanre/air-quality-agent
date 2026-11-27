@@ -20,7 +20,16 @@ Pitch: **"Our agents warn London about bad air days before they happen, and expl
 - Removed all traffic code from `data/fetch.py`. It still writes `hourly_merged.csv`
   (air quality, weather, boundary layer, ventilation index), now without traffic columns.
 - Removed `TFL_APP_KEY` from `.env.example` and the traffic lines from `data/limitations.md`.
-- Added 6 rows to `docs/decision_log.md`.
+- Added rows to `docs/decision_log.md`.
+- Updated `docs/project_story.md`, the READMEs and `data/limitations.md` for the forecast.
+- **Agreed the forecast's shape**: `data/sample/sample_forecast.csv` (invented numbers, column
+  meanings in `data/sample/README.md`). `forecast.py` must produce exactly these columns.
+- **Agent instructions updated** for the forecast: `coordinator.md`, `analyst.md`, `reviewer.md`,
+  the Advisor brief, `alert_flow.md` (see `agents/changes_log.md`).
+- **Forecast tool written**: `agents/airquality_forecast_api.yaml` (GetAirQualityForecast). The
+  old weather tool `forecast_api.yaml` is removed.
+- **Daily workflow ready**: `daily.yml` runs `data/forecast.py` as soon as the file exists and
+  publishes `data/latest/forecast.csv` and `forecast.json`. Until then it skips that step.
 
 ## Important detail about dates
 
@@ -75,7 +84,11 @@ Create `data/forecast.py`. In plain English it should:
      thresholds the Coordinator already uses
    - `typical_error_ugm3`: the model's average miss from the backtest (Phase 2), so the agents
      can say how sure we are
-   - the weather values used (forecast wind, rain, boundary layer), so the Analyst can explain
+   - `persistence_error_ugm3`: the simple guess's average miss, for comparison
+   - the weather values used (forecast wind, rain, temperature, mixing height), so the Analyst
+     can explain
+   - **Exact columns and order: `data/sample/sample_forecast.csv`** (meanings in
+     `data/sample/README.md`). Do not rename anything; the agents read these names.
 6. **Write** `data/processed/forecast.csv`. The workflow (Phase 3) copies it to
    `data/latest/forecast.json`.
 
@@ -114,22 +127,25 @@ Create `data/backtest.py` and `docs/forecast_evaluation.md`.
 5. Write the results table and 3 to 5 plain sentences into `docs/forecast_evaluation.md`.
    The `typical_error_ugm3` used in Phase 1 comes from here.
 
-## Phase 3: put it in the daily run (Thu 3 to Fri 4 Dec). Owner: PercyAbs
+## Phase 3: put it in the daily run (workflow and tool file done 27 Nov). Owner: PercyAbs
 
-1. In `.github/workflows/daily.yml`, after `summarise.py`, run `python data/forecast.py`, copy
-   `forecast.csv` into `data/latest/`, and wrap it as `forecast.json` the same way
-   `summary.json` is made (Copilot Studio REST tools need JSON).
-2. Add `agents/forecast_data_api.yaml`, a copy of `summary_api.yaml` pointing at
-   `/data/latest/forecast.json`, operationId `GetAirQualityForecast`.
-   - Verify: open the raw GitHub URL in a browser. Prediction: JSON with a `forecast_csv`
-     field holding 8 rows and a `made_for` date of today.
-3. Decide on the old weather tool (`GetWeatherForecast`): **keep it** only if the agents need
-   weather beyond what is in `forecast.json`. Otherwise remove it to keep the demo simple.
+1. Done: `daily.yml` runs `forecast.py` when it exists and publishes `forecast.csv` and
+   `forecast.json`. The tool file is `agents/airquality_forecast_api.yaml`.
+2. After `forecast.py` is merged, trigger the daily workflow by hand (Actions tab, "Run workflow").
+   - Verify: open https://raw.githubusercontent.com/abasslanre/air-quality-agent/main/data/latest/forecast.json.
+     Prediction: JSON with `made_on` = today, `based_on_date` = yesterday, and a `forecast_csv`
+     field holding a header plus 8 rows.
+3. Decided: the old weather tool is removed; `forecast.json` already carries the forecast weather.
 
-## Phase 4: update the agents (Fri 4 to Sun 6 Dec). Owners: PercyAbs and Precious
+## Phase 4: update the agents (instructions written 27 Nov; build by Sun 6 Dec). Owners: PercyAbs and Precious
 
-In Copilot Studio, add the `GetAirQualityForecast` tool to the Coordinator, then update the
-instructions in `agents/` (and record each change in `agents/changes_log.md`):
+The instruction files in `agents/` are already updated (summary below). Still to do:
+PercyAbs adds the `GetAirQualityForecast` tool and removes the weather tool in Copilot Studio,
+then pastes the new instructions; Precious writes the Advisor from its brief and reviews the
+Analyst and Reviewer changes. Until `forecast.py` exists, test by attaching
+`data/sample/sample_forecast.csv` in the test chat (tomorrow's NO2 is Serious on purpose).
+
+What changed:
 
 - **Coordinator**
   - Always call GetDailySummary **and** GetAirQualityForecast.
@@ -137,9 +153,10 @@ instructions in `agents/` (and record each change in `agents/changes_log.md`):
   - Alert rule: draft an alert if **today or tomorrow is forecast Serious**, through the same
     approval flow. Title starts "Forecast:" so nobody confuses it with a measurement.
   - Questions like "Will tomorrow be bad?" go straight to the forecast.
-- **Analyst**: explains *why* the forecast says what it says, only from columns in the file
-  (for example "forecast wind is low and the boundary layer is shallow, and both are linked to
-  higher NO2 in summary.csv").
+- **Analyst**: bullet 3 is the worst forecast row with its typical error; an optional bullet sets
+  a forecast weather value beside a yearly link (for example "mixing height on 2026-11-28 is
+  forecast at 380 m; over the year, higher NO2 is linked to lower mixing height"), with no
+  judgement words and no claim that it explains the forecast.
 - **Reviewer**: new rules. A forecast must be labelled as a forecast. It must quote the
   `typical_error_ugm3`. It must never be stated as certain.
 - **Advisor**: one action for the forecast day (for example "plan outdoor school activities
@@ -196,4 +213,5 @@ Add a forecast section that reads `data/latest/forecast.json` and `daily.csv`:
 1. Train on 1 year or 2? Two years gives the model more winters to learn from but doubles the
    download (the cache in `data/raw/` makes repeat runs cheap).
 2. Should the CAMS comparison job be a separate small workflow or part of the daily one?
-3. Do we keep the old weather tool in Copilot Studio or rely only on `forecast.json`?
+3. ~~Do we keep the old weather tool?~~ Decided 27 Nov: removed; `forecast.json` carries the
+   forecast weather.

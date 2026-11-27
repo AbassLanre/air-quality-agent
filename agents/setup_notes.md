@@ -20,8 +20,10 @@ Topics, Activity, Evaluation, Monitor, Channels, plus a "Test your agent" chat p
 | --- | --- |
 | Main agent | Coordinator, instructions from `coordinator.md` |
 | Child agents | Analyst, Reviewer, Advisor |
-| Tool | REST API from `summary_api.yaml`, no authentication |
-| Data address | https://raw.githubusercontent.com/abasslanre/air-quality-agent/main/data/latest/summary.csv |
+| Tool 1 | REST API from `summary_api.yaml`, no authentication (GetDailySummary, GetSummaryReport) |
+| Tool 2 | REST API from `airquality_forecast_api.yaml`, no authentication (GetAirQualityForecast) |
+| Removed | "London Weather Forecast" (Open-Meteo) tool: no longer used, the forecast file carries the forecast weather |
+| Data addresses | https://raw.githubusercontent.com/abasslanre/air-quality-agent/main/data/latest/summary.json and `forecast.json` in the same folder |
 
 ## First test (test_analyst, 18 Nov 2026)
 

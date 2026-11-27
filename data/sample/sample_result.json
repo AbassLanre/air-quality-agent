@@ -1,19 +1,25 @@
 {
   "city": "London",
-  "date": "2026-11-17",
-  "action": "Expect higher NO2 near busy roads between 17:00 and 20:00 if wind stays low. Advise schools and outdoor workers near main roads to limit evening exposure.",
+  "date": "2026-11-26",
+  "levels": {
+    "yesterday": {"date": "2026-11-26", "type": "measured", "level": "Serious", "deciding_figure": "PM2.5 today_percentile = 93"},
+    "today": {"date": "2026-11-27", "type": "forecast", "level": "Elevated", "deciding_figure": "NO2 predicted_percentile = 86", "typical_error_ugm3": 6.1},
+    "tomorrow": {"date": "2026-11-28", "type": "forecast", "level": "Serious", "deciding_figure": "NO2 predicted_percentile = 92", "typical_error_ugm3": 7.4}
+  },
+  "action": "NO2 is forecast to be Serious on 2026-11-28: schools and outdoor workers near main roads may want to plan outdoor activity for less exposed areas that day.",
   "confidence": "medium",
   "supporting_figures": [
-    {"pollutant": "NO2", "measure": "peak_ugm3", "value": 37.6, "hour": 18},
-    {"pollutant": "NO2", "measure": "link_wind", "value": -0.62}
+    {"pollutant": "PM2.5", "measure": "today_percentile", "value": 93, "date": "2026-11-26"},
+    {"pollutant": "NO2", "measure": "link_mixing", "value": -0.69, "date": "2026-11-26"},
+    {"pollutant": "NO2", "measure": "predicted_ugm3", "value": 44.2, "date": "2026-11-28", "typical_error_ugm3": 7.4}
   ],
-  "data_issues": ["41 NO2 sites reported no data"],
+  "alert": "Early warning drafted and sent for approval",
+  "data_issues": ["NO2 and O3: site KC1 had no full day of data on 2026-11-26"],
   "steps": [
-    {"agent": "Collector", "output": "Fetched London Air and Open-Meteo for 2026-11-17. 41 of 99 NO2 sites had no data."},
-    {"agent": "Analyst", "output": "- NO2 peaked at 37.6 µg/m³ at 18:00\n- NO2 is linked to low wind (link -0.62 over 30 days)\n- NO2 is linked to rush hour (link 0.34)"},
-    {"agent": "Reviewer", "status": "sent_back", "output": "Rejected: 'traffic caused the peak'. No traffic figure in the table. Use 'linked to'."},
-    {"agent": "Analyst", "output": "Revised: removed the traffic claim; kept the wind and hour links."},
-    {"agent": "Reviewer", "status": "approved", "output": "All claims match figures in the summary table."},
-    {"agent": "Advisor", "output": "Expect higher NO2 near busy roads between 17:00 and 20:00 if wind stays low."}
+    {"agent": "Analyst", "output": "Date: 2026-11-26\n- PM2.5 was worse than 93% of days this year (PM2.5 today_percentile = 93).\n- Over the year, higher NO2 is linked to lower mixing height (NO2 link_mixing = -0.69).\n- Forecast: NO2 on 2026-11-28 will be 44.2 µg/m³ because of the traffic."},
+    {"agent": "Reviewer", "status": "sent_back", "output": "Rejected\n1. Bullet 3: \"will be 44.2\" Reason: FORECAST - stated as certain and no typical_error_ugm3. Fix: write \"is forecast at\" and give the error.\n2. Bullet 3: \"because of the traffic\" Reason: CAUSAL / NO_FIGURE - there is no traffic column in the tables. Fix: remove it."},
+    {"agent": "Analyst", "output": "Revised bullet 3: Forecast: NO2 on 2026-11-28 is forecast at 44.2 µg/m³, worse than 92% of days this year, typically within 7.4 µg/m³ (NO2 2026-11-28 predicted_ugm3 = 44.2; predicted_percentile = 92; typical_error_ugm3 = 7.4)."},
+    {"agent": "Reviewer", "status": "approved", "output": "Approved"},
+    {"agent": "Advisor", "output": "Action: NO2 is forecast to be Serious on 2026-11-28: schools and outdoor workers near main roads may want to plan outdoor activity for less exposed areas that day.\nConfidence: medium - forecast, typical error 7.4 µg/m³ and one NO2 site missing yesterday."}
   ]
 }

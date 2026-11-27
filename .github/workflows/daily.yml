@@ -53,6 +53,27 @@ jobs:
               {"date": date, "report": report}), encoding="utf-8")
           PY
 
+      - name: Forecast today and tomorrow (runs once data/forecast.py exists)
+        run: |
+          if [ -f data/forecast.py ]; then
+            python data/forecast.py
+            cp data/processed/forecast.csv data/latest/forecast.csv
+            python - <<'PY'
+          import csv, json
+          from pathlib import Path
+          latest = Path("data/latest")
+          csv_text = (latest / "forecast.csv").read_text(encoding="utf-8")
+          rows = list(csv.DictReader(csv_text.splitlines()))
+          first = rows[0] if rows else {}
+          (latest / "forecast.json").write_text(json.dumps(
+              {"city": "London", "made_on": first.get("made_on", ""),
+               "based_on_date": first.get("based_on_date", ""), "forecast_csv": csv_text}),
+              encoding="utf-8")
+          PY
+          else
+            echo "data/forecast.py not written yet; skipping the forecast"
+          fi
+
       - name: Save today's summary
         run: |
           git config user.name "github-actions"

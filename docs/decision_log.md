@@ -39,3 +39,8 @@
 | 2026-11-27 | Forecast made by a Python script in GitHub Actions; agents read it, they do not predict | An LLM asked to forecast would invent numbers that change each time (same reason the code interpreter is not used) | PercyAbs |
 | 2026-11-27 | Forecast horizon capped at 2 days | Weather forecasts, the main input, lose accuracy quickly after 2 days | PercyAbs |
 | 2026-11-27 | Forecast judged against two benchmarks: "tomorrow = today" and the CAMS European forecast (Open-Meteo air quality API) | The model is only worth using if it beats the simple guess; CAMS shows how close we get to a professional forecast | PercyAbs |
+| 2026-11-27 | Forecast handover shape fixed in data/sample/sample_forecast.csv (16 columns, 8 rows: 4 pollutants x today and tomorrow) | Agents, Streamlit and tests can be built now against invented numbers while forecast.py is written | PercyAbs |
+| 2026-11-27 | likely_level set by code with the Coordinator's percentile thresholds (90+ Serious, 75-89 Elevated) | The agents must not calculate; the same rule is used for measured and forecast days | PercyAbs |
+| 2026-11-27 | Early warnings only when today or tomorrow is forecast Serious; a Serious yesterday alone no longer triggers an alert | The point is to warn before the bad day; alerting about yesterday is too late to act on | PercyAbs |
+| 2026-11-27 | Open-Meteo weather tool (GetWeatherForecast) removed from the Coordinator; replaced by GetAirQualityForecast | forecast.json already carries the forecast weather; one tool is simpler and keeps the numbers consistent | PercyAbs |
+| 2026-11-27 | Daily workflow runs data/forecast.py only if the file exists | The workflow can be merged now without breaking the daily summary | PercyAbs |
