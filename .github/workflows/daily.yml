@@ -2,7 +2,9 @@ name: Daily air quality run
 
 on:
   schedule:
-    - cron: "0 6 * * *"     # 06:00 UTC every day
+    - cron: "0 6,12 * * *"  # 06:00 and 12:00 UTC every day (London: 6am and 12pm in winter, 7am and 1pm in summer)
+    # The 06:00 run feeds the Copilot Studio daily check at 07:30 UTC. The 12:00 run refreshes the
+    # data for chat questions and Streamlit (newer weather forecast; the official index is usually out by then).
   workflow_dispatch:        # adds a "Run workflow" button for testing
 
 permissions:
@@ -53,11 +55,34 @@ jobs:
               {"date": date, "report": report}), encoding="utf-8")
           PY
 
+      - name: Forecast today and tomorrow (runs once data/forecast.py exists)
+        run: |
+          if [ -f data/forecast.py ]; then
+            python data/forecast.py
+            cp data/processed/forecast.csv data/latest/forecast.csv
+            cp data/processed/backtest.csv data/latest/backtest.csv
+            cp data/processed/backtest_days.csv data/latest/backtest_days.csv
+            python - <<'PY'
+          import csv, json
+          from pathlib import Path
+          latest = Path("data/latest")
+          csv_text = (latest / "forecast.csv").read_text(encoding="utf-8")
+          rows = list(csv.DictReader(csv_text.splitlines()))
+          first = rows[0] if rows else {}
+          (latest / "forecast.json").write_text(json.dumps(
+              {"city": "London", "made_on": first.get("made_on", ""),
+               "based_on_date": first.get("based_on_date", ""), "forecast_csv": csv_text}),
+              encoding="utf-8")
+          PY
+          else
+            echo "data/forecast.py not written yet; skipping the forecast"
+          fi
+
       - name: Save today's summary
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git add data/latest/
-          git commit -m "Daily summary $(date -u +%F)" || echo "No change"
+          git commit -m "Daily summary $(date -u '+%F %H:%M') UTC" || echo "No change"
           git pull --rebase
           git push

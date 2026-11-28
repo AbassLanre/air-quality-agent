@@ -1,0 +1,32 @@
+swagger: "2.0"
+info:
+  title: London Air Quality Forecast
+  version: "1.0"
+host: raw.githubusercontent.com
+basePath: /abasslanre/air-quality-agent/main
+schemes: [https]
+paths:
+  /data/latest/forecast.json:
+    get:
+      operationId: GetAirQualityForecast
+      summary: Get the air quality forecast for London for today and tomorrow
+      description: Returns our model's forecast for today (lead_days 1) and tomorrow (lead_days 2), made every morning by Python from the past year of air quality and the weather forecast. The forecast_csv field holds the table as CSV text, one row per pollutant and day, with the predicted level, how it would rank against the past year, the likely seriousness level, the model's typical error and the forecast weather used. Every figure is calculated by code; never change or recalculate them.
+      produces: [application/json]
+      responses:
+        "200":
+          description: The forecast
+          schema:
+            type: object
+            properties:
+              city:
+                type: string
+                description: City the forecast covers (London).
+              made_on:
+                type: string
+                description: Day the forecast was made (YYYY-MM-DD).
+              based_on_date:
+                type: string
+                description: Last full day of measured data the forecast starts from, usually yesterday (YYYY-MM-DD).
+              forecast_csv:
+                type: string
+                description: The forecast table as CSV text, 8 rows (4 pollutants x 2 days). Column meanings are in data/sample/README.md.

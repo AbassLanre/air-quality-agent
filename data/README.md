@@ -1,6 +1,6 @@
 # data/ (Carlos, Daniel)
 
-Python that fetches, cleans and summarises London air quality and weather data.
+Python that fetches, cleans, summarises and forecasts London air quality from weather data.
 Status: working and tested on 21 Nov 2026 (Windows, Python 3.15).
 
 ## The one daily command
@@ -18,7 +18,8 @@ months are cached in `data/raw/`. No API keys are needed for the data.
 
 | Script | What it does | Writes |
 | --- | --- | --- |
-| `fetch.py` | Downloads hourly readings for a fixed panel of 8 London Air sites and hourly central-London weather from Open-Meteo, for the last 365 days. Keeps every raw download as a cache and tidies them into two hourly tables (all times GMT). | `data/raw/`, `data/processed/air_hourly.csv`, `weather_hourly.csv`, `fetch_report.txt` |
+| `fetch.py` | Downloads hourly readings for a fixed panel of 8 London Air sites and hourly central-London weather from Open-Meteo, for the last 365 days. Keeps every raw download as a cache and tidies them into hourly tables (all times GMT), including one merged row per hour with air quality, weather, boundary layer and ventilation index. | `data/raw/`, `data/processed/air_hourly.csv`, `weather_hourly.csv`, `hourly_merged.csv`, `fetch_report.txt` |
+| `forecast.py` | Learns from the past year how each pollutant follows the previous days and the weather (ridge regression, 8 small models), takes the Open-Meteo forecast for today and tomorrow, and predicts each pollutant's daily average, its percentile against the past year, the likely level and the model's typical error. Replays the last 90 days every run to measure that error. `--based-on 2026-11-20` replays any past day with recorded weather (tests, demo backup) | `data/processed/forecast.csv` (shaped like `data/sample/sample_forecast.csv`), `backtest.csv`, `backtest_days.csv`, `forecast_report.txt` |
 | `summarise.py` | Cleans to daily values (a site's day counts only with 18 of 24 hours), averages the panel sites, adds the day's weather, calculates the links over the last 365 days, and adds the official daily index. | `data/processed/summary.csv`, `daily.csv`, `summary_report.txt` |
 
 Other options:
@@ -33,12 +34,19 @@ Other options:
   Every column is explained at the top of `summarise.py`.
 - `daily.csv`: every day of the last 365 days (for charts and choosing test days).
 - `summary_report.txt`: the same summary as text, plus which sites had no full day of data.
+- `hourly_merged.csv`: every hour of the past year, all sources side by side (input for the forecast).
+- `forecast.csv` (once `forecast.py` exists): 8 rows, 4 pollutants x today and tomorrow. Column
+  meanings: `data/sample/README.md`.
 
 ## For the agents (Lanre)
 
 - Daily run: a GitHub Actions workflow runs `python data/summarise.py --fetch` once a day and
-  publishes `data/latest/summary.csv`. Lanre owns the workflow and the copy to `data/latest/`.
-- The agents read `data/latest/summary.csv`. Column meanings: `data/sample/README.md`.
+  publishes `data/latest/summary.csv` (and `.json`). It then runs `python data/forecast.py` if the
+  file exists and publishes `data/latest/forecast.csv` (and `.json`). Lanre owns the workflow.
+- The agents read the JSON versions. Column meanings: `data/sample/README.md`.
+- `forecast.py` must: read only `data/processed/` (no new downloads except the weather forecast),
+  give the same output for the same input, never fill in missing values (write a `note`
+  instead), and keep the column names of `sample_forecast.csv` exactly.
 - Notes for the workflow:
   - `data/raw/` is not committed, so each run downloads the full 365 days (about 1-5 minutes).
     Caching `data/raw/` between runs (for example with GitHub's cache action) cuts this to seconds.
@@ -46,8 +54,8 @@ Other options:
     Tested on Python 3.12 and 3.15.
   - If the run happens before London Air publishes the official daily index, `daqi_max` is blank.
     Running later in the day makes it more likely to be filled.
-  - `data/processed/summary_report.txt` lists the sites without a full day of data, which is
-    useful for the Collector; it is worth copying to `data/latest/` as well.
+  - `data/processed/summary_report.txt` lists the sites without a full day of data; the workflow
+    copies it to `data/latest/` for the Coordinator.
   - `fetch.py` retries each download three times and lists any failed months in `fetch_report.txt`.
     `summarise.py` stops with an error if there is no data to summarise.
 
@@ -80,7 +88,7 @@ Chosen because each pollutant at each site had a value in at least 80% of hours 
 ## Rules
 
 - Raw and processed data are not committed (see `.gitignore`); only the scripts and notes are.
-  The exception is `data/latest/summary.csv`, which the daily workflow publishes.
+  The exception is `data/latest/`, which the daily workflow publishes.
 - Data limitations: see `limitations.md`.
 
 ## Done when

@@ -11,8 +11,6 @@
   different values, and seasonal patterns can dominate.
 - Links are correlations: they show that two things move together, not that one causes the other.
 - The official index (`daqi_max`) covers all London Air sites, not only our 8-site panel.
-- Traffic is TfL's disruption status for 24 main London roads (not vehicle counts, and not the streets next to each monitor). Most hours show no delays, so the signal sits in the bad hours.
-- Traffic history only starts when polling started, and only 12 hours a day are polled (more often in rush hours). Hours not polled are blank.
-- Before 8 Dec there will not be enough traffic history (30 days) for a traffic link in summary.csv.
 - Boundary layer height is modelled for one point in central London, not measured.
 - Hourly values may be one hour out if the providers' timestamp conventions differ (not yet checked).
+- Forecast (planned): the model learns from the weather that actually happened, but runs live on the weather forecast, which can be wrong, so live accuracy will be lower than the backtest. It predicts at most 2 days ahead.

@@ -4,7 +4,12 @@
   shape the daily run publishes to `data/latest/summary.csv`. The agents, the Streamlit page and the
   tests build against it. NO2 that day was at the 91st percentile, so it is a useful "Serious day"
   test case.
-- `sample_result.json`: example of what the agents hand to the Streamlit page (invented).
+- `sample_forecast.csv`: the agreed shape of the daily forecast (`data/latest/forecast.csv`, made by
+  `data/forecast.py`). The numbers are **invented** so the agents and the page can be built before
+  the model exists. Tomorrow's NO2 is set to Serious on purpose, to test the early-warning alert.
+- `sample_result.json`: example of what the agents hand to the Streamlit page (invented), matching
+  the two samples above: yesterday measured, today and tomorrow forecast, and a Reviewer loop
+  that rejects a forecast stated as certain.
 
 Changing a column means telling PercyAbs first, because the agents and the page both read these names.
 
@@ -39,3 +44,30 @@ from code; the agents never calculate.
 
 Links are correlations: they show that two things move together, not that one causes the other.
 See `data/limitations.md`.
+
+## sample_forecast.csv columns
+
+One row per pollutant (NO2, PM2.5, PM10, O3) and forecast day: 8 rows. Every number comes from
+`data/forecast.py`; the agents never calculate or predict.
+
+| Column | Meaning | Unit |
+| --- | --- | --- |
+| city | City name (London) | |
+| made_on | Day the forecast was made (the morning run) | YYYY-MM-DD |
+| based_on_date | Last full day of measured data, usually yesterday; the same as `date` in summary.csv | YYYY-MM-DD |
+| target_date | Day being forecast | YYYY-MM-DD |
+| lead_days | Days after based_on_date: 1 = today, 2 = tomorrow | 1 or 2 |
+| pollutant | NO2, PM2.5, PM10 or O3 | |
+| predicted_ugm3 | Forecast daily average across the panel sites | µg/m³ |
+| typical_error_ugm3 | Our model's average miss in the backtest (mean absolute error) for this pollutant and lead | µg/m³ |
+| persistence_error_ugm3 | Average miss of the simple guess "same as the last measured day", for comparison. Lower typical_error_ugm3 = our model does better | µg/m³ |
+| predicted_percentile | % of the past 365 days with an average at or below predicted_ugm3. Same idea as today_percentile | 0 to 100 |
+| likely_level | Serious (predicted_percentile 90 or more), Elevated (75 to 89), Normal (below 75). Set by code with the same thresholds the Coordinator uses | |
+| forecast_wind_kmh | Open-Meteo forecast mean wind, central London, that day | km/h |
+| forecast_rain_mm | Forecast total rain that day | mm |
+| forecast_temp_c | Forecast mean temperature | °C |
+| forecast_mixing_height_m | Forecast mean mixing height (boundary layer height) | m |
+| note | Anything the agents must mention, e.g. "no measured data for 2026-11-26, forecast less reliable". Blank if nothing | |
+
+A forecast is a prediction, not a measurement. The model is trained on the weather that actually
+happened but runs on forecast weather, so live errors may be larger than typical_error_ugm3.
