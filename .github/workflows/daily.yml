@@ -58,6 +58,8 @@ jobs:
           if [ -f data/forecast.py ]; then
             python data/forecast.py
             cp data/processed/forecast.csv data/latest/forecast.csv
+            cp data/processed/backtest.csv data/latest/backtest.csv
+            cp data/processed/backtest_days.csv data/latest/backtest_days.csv
             python - <<'PY'
           import csv, json
           from pathlib import Path

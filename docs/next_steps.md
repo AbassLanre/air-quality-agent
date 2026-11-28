@@ -55,7 +55,7 @@ No further than that. Weather forecasts, our main input, get much worse after 2 
      has the same columns as before. Nothing the agents read has changed.
 4. Send the team this file and get a yes or no on the plan by Sunday evening.
 
-## Phase 1: the forecast script (Mon 30 Nov to Wed 2 Dec). Owners: Carlos and Daniel (Data)
+## Phase 1: the forecast script (first version written 28 Nov, `data/forecast.py`). Owners: Carlos and Daniel (Data) to review and improve
 
 Create `data/forecast.py`. In plain English it should:
 
@@ -106,7 +106,8 @@ a bit worse than the backtest. This is normal practice, but we must say it.
 
 ## Phase 2: prove it works (Wed 2 to Fri 4 Dec). Owners: Daniel and Carlos (Testing)
 
-Create `data/backtest.py` and `docs/forecast_evaluation.md`.
+The backtest itself is built into `data/forecast.py` (28 Nov). Still to do: the CAMS comparison
+and `docs/forecast_evaluation.md`.
 
 1. **Backtest.** For each of the last 90 days: train only on days before it, predict it,
    compare with what actually happened. (Pretend it is that morning; no peeking at the future.)
