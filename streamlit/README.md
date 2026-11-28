@@ -14,7 +14,7 @@ real data.
 ## Data to read
 
 Read the same files the agents read, straight from GitHub, so the page and the agent always show
-the same day. GitHub Actions refreshes them every morning at 06:00 UTC.
+the same day. GitHub Actions refreshes them at 06:00 and 12:00 UTC.
 
 | File | Address | Contents |
 | --- | --- | --- |

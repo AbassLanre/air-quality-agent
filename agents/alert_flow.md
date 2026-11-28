@@ -1,6 +1,6 @@
 # Send Air Quality Alert (agent flow, owner: PercyAbs)
 
-The coordinator calls this only when today or tomorrow is **forecast** Serious (an early warning). A person must approve before any email goes out.
+The coordinator calls this only during the scheduled **DAILY CHECK** (Recurrence trigger, 07:30 UTC), and only when today or tomorrow is **forecast** Serious (an early warning). Chat questions never call it, so the approver gets at most one alert a day. A person must approve before any email goes out.
 Based on Microsoft Learn: "Request information from human review in agent flows" and "Agent flows
 overview". Screen names may differ slightly in the school's Copilot Studio.
 
@@ -30,3 +30,5 @@ overview". Screen names may differ slightly in the school's Copilot Studio.
 | Forecast with today and tomorrow both Elevated or Normal (even if yesterday was Serious) | Agent does not call the flow; "Alert: not needed" |
 | Forecast with a Serious day (use `data/sample/sample_forecast.csv`: NO2 on 2026-11-28, predicted_percentile 92) | Agent calls the flow with a title starting "Forecast:", replies "Sent to a person for approval" |
 | Forecast tool fails | No alert; "Forecast unavailable" under Data issues |
+| Ordinary chat question on a day forecast Serious | No flow call; Alert line says early warnings are sent by the daily check |
+| "Test trigger" on the Recurrence trigger (or type a message starting "DAILY CHECK") with a Serious forecast | Flow called once; approval email arrives |

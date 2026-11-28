@@ -14,7 +14,7 @@ time and expertise, so most days nobody does it.
 A team of AI agents that looks ahead every morning, warns about bad air days before they happen,
 and only involves a person when it matters.
 
-1. **Reliable numbers (code).** Every morning at 06:00 UTC, GitHub Actions runs our Python. It
+1. **Reliable numbers (code).** At 06:00 and 12:00 UTC every day, GitHub Actions runs our Python. It
    downloads a year of hourly readings from 8 reliable London Air monitoring sites and Open-Meteo
    weather (including how deep the air layer is that pollution can spread into), cleans them, and
    calculates yesterday's summary: levels, peaks, how yesterday ranks against the past year, and
@@ -30,9 +30,10 @@ and only involves a person when it matters.
    why the forecast looks the way it does (for example low wind and a shallow mixing layer). The
    Reviewer checks every claim against the numbers, makes sure forecasts are labelled as
    forecasts with their typical error, and sends unsupported claims back, at most twice.
-5. **Action.** The Advisor turns the findings into one clear action. When today or tomorrow is
-   forecast Serious, the Coordinator drafts an early warning and sends it for a person to approve
-   before it goes out by email.
+5. **Action.** The Advisor turns the findings into one clear action. Every day at 07:30 UTC a
+   Copilot Studio Recurrence trigger starts the Coordinator by itself, with nobody asking. If
+   today or tomorrow is forecast Serious, it drafts an early warning and sends it for a person to
+   approve before it goes out by email. Anyone can also ask the agent at any time.
 
 ## How we know the forecast is worth using
 

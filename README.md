@@ -11,7 +11,7 @@ claims, give one clear action and draft an early warning that a person approves.
 
 There are two kinds of workers:
 
-- **Code** (Python, in GitHub Actions at 06:00 UTC) fetches, cleans, calculates and forecasts.
+- **Code** (Python, in GitHub Actions at 06:00 and 12:00 UTC) fetches, cleans, calculates and forecasts.
   Same job every time, no AI involved. Results are published to `data/latest/`.
 - **Agents** (Copilot Studio) read what the code produced through REST tools, judge it, explain
   it, check it and advise. Agents never calculate or predict.
@@ -21,13 +21,13 @@ Daily run:
 1. **Code**: `summarise.py --fetch` downloads a year of London Air and Open-Meteo data and writes
    yesterday's summary. `forecast.py` predicts each pollutant for today and tomorrow, with how it
    ranks against the past year and the model's typical error.
-2. **Coordinator** rates yesterday (measured), today and tomorrow (forecast) as Serious,
-   Elevated or Normal.
+2. **Coordinator** (started by a Copilot Studio Recurrence trigger at 07:30 UTC, or by anyone
+   asking) rates yesterday (measured), today and tomorrow (forecast) as Serious, Elevated or Normal.
 3. **Analyst** explains what the pollution is linked to and what the forecast shows.
 4. **Reviewer** checks each claim against the numbers and sends unsupported claims back (max twice).
 5. **Advisor** turns the reviewed findings into one action for the worst forecast day.
-6. If today or tomorrow is forecast **Serious**, the Coordinator drafts an early warning; a person
-   approves it before it is emailed.
+6. In the 07:30 daily check, if today or tomorrow is forecast **Serious**, the Coordinator drafts
+   an early warning; a person approves it before it is emailed.
 7. The **Streamlit** page shows the measured history, the forecast and how accurate it has been.
 
 Full story: `docs/project_story.md`. Plan to 14 Dec: `docs/next_steps.md`.

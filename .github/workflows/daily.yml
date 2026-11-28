@@ -2,7 +2,9 @@ name: Daily air quality run
 
 on:
   schedule:
-    - cron: "0 6 * * *"     # 06:00 UTC every day
+    - cron: "0 6,12 * * *"  # 06:00 and 12:00 UTC every day (London: 6am and 12pm in winter, 7am and 1pm in summer)
+    # The 06:00 run feeds the Copilot Studio daily check at 07:30 UTC. The 12:00 run refreshes the
+    # data for chat questions and Streamlit (newer weather forecast; the official index is usually out by then).
   workflow_dispatch:        # adds a "Run workflow" button for testing
 
 permissions:
@@ -81,6 +83,6 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git add data/latest/
-          git commit -m "Daily summary $(date -u +%F)" || echo "No change"
+          git commit -m "Daily summary $(date -u '+%F %H:%M') UTC" || echo "No change"
           git pull --rebase
           git push

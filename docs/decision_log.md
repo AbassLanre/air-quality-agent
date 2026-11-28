@@ -44,3 +44,6 @@
 | 2026-11-27 | Early warnings only when today or tomorrow is forecast Serious; a Serious yesterday alone no longer triggers an alert | The point is to warn before the bad day; alerting about yesterday is too late to act on | PercyAbs |
 | 2026-11-27 | Open-Meteo weather tool (GetWeatherForecast) removed from the Coordinator; replaced by GetAirQualityForecast | forecast.json already carries the forecast weather; one tool is simpler and keeps the numbers consistent | PercyAbs |
 | 2026-11-27 | Daily workflow runs data/forecast.py only if the file exists | The workflow can be merged now without breaking the daily summary | PercyAbs |
+| 2026-11-28 | GitHub Actions runs twice a day, 06:00 and 12:00 UTC | The midday run picks up a newer weather forecast and the official index, which is often not published by 06:00 | PercyAbs |
+| 2026-11-28 | Copilot Studio Recurrence trigger runs the Coordinator by itself at 07:30 UTC ("DAILY CHECK") | Without it the agent only acts when someone asks, so a forecast Serious day could pass with no warning; 07:30 leaves a buffer for late GitHub runs | PercyAbs |
+| 2026-11-28 | Early warnings only from the daily check, never from chat | Stops the approver getting a duplicate alert every time someone asks about a Serious day | PercyAbs |
